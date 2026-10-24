@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1b0b05" />
+  <title>Latte Art</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Kalam:wght@400;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+
+    :root {
+      --cream: #fff1dd;
+      --gold: #f5b13f;
+      --gold-light: #ffd17b;
+      --gold-deep: #be7520;
+      --cocoa: #1b0b05;
+      --cocoa-mid: #2d1208;
+      --cocoa-soft: #4a2410;
+      --wheel-size: clamp(340px, min(75vw, 72vh), 680px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--cream);
+      font-family: "DM Sans", "Noto Sans Thai", sans-serif;
+      background:
+        radial-gradient(circle at 50% 43%, rgba(121, 58, 19, .27) 0, rgba(48, 19, 7, .09) 29%, transparent 53%),
+        radial-gradient(circle at 14% 7%, rgba(125, 64, 20, .22), transparent 23%),
+        radial-gradient(circle at 87% 85%, rgba(105, 49, 16, .17), transparent 25%),
+        linear-gradient(135deg, #130703 0%, #2d1309 49%, #160803 100%);
+    }
+
+    body::before,
+    body::after {
+      position: fixed;
+      z-index: -1;
+      width: 52vw;
+      height: 52vw;
+      border: 1px solid rgba(250, 183, 68, .055);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+
+    body::before { top: -36vw; left: -25vw; }
+    body::after { right: -28vw; bottom: -36vw; }
+
+    .page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      min-height: 100svh;
+      padding: clamp(26px, 4vh, 44px) 18px 32px;
+    }
+
+    .masthead {
+      text-align: center;
+      animation: reveal .7s ease-out both;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--cream);
+      font-family: "Kalam", "Noto Sans Thai", cursive;
+      font-size: clamp(2.25rem, 5.3vw, 4rem);
+      font-weight: 700;
+      letter-spacing: .025em;
+      line-height: 1;
+      text-shadow: 0 3px 18px rgba(0, 0, 0, .4);
+    }
+
+    h1 span {
+      display: inline-block;
+      margin: 0 .17em;
+      color: var(--gold-light);
+      font-family: Arial, sans-serif;
+      font-size: .51em;
+      vertical-align: .14em;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      color: rgba(255, 240, 220, .9);
+      font-family: "Noto Sans Thai", sans-serif;
+      font-size: clamp(.94rem, 2.2vw, 1.25rem);
+      font-weight: 500;
+    }
+
+    .wheel-area {
+      display: grid;
+      place-items: center;
+      position: relative;
+      width: min(100%, 700px);
+      min-height: var(--wheel-size);
+      margin-top: clamp(18px, 3.2vh, 32px);
+      padding: 20px;
+    }
+
+    .pointer {
+      position: absolute;
+      z-index: 5;
+      top: 5px;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-top: clamp(43px, 5.15vw, 55px) solid var(--gold);
+      border-right: clamp(18px, 2.35vw, 25px) solid transparent;
+      border-bottom: 0;
+      border-left: clamp(18px, 2.35vw, 25px) solid transparent;
+      filter: drop-shadow(0 5px 3px rgba(0, 0, 0, .42));
+      transform: translateX(-50%);
+    }
+
+    .pointer::after {
+      position: absolute;
+      top: clamp(7px, 1.1vw, 10px);
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-right: clamp(8px, 1vw, 11px) solid transparent;
+      border-top: clamp(25px, 3vw, 32px) solid rgba(255, 221, 142, .52);
+      border-bottom: 0;
+      border-left: clamp(8px, 1vw, 11px) solid transparent;
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .wheel-shell {
+      position: relative;
+      z-index: 1;
+      width: var(--wheel-size);
+      height: var(--wheel-size);
+      padding: clamp(7px, .85vw, 10px);
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd786 3%, #ca7a22 42%, #f7bd55 71%, #9a4e12 100%);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, .52), 0 0 0 2px rgba(255, 209, 116, .15), inset 0 1px rgba(255,255,255,.36);
+    }
+
+    .wheel {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 2px solid rgba(255, 239, 204, .75);
+      border-radius: 50%;
+      background:
+        repeating-conic-gradient(from -20deg, transparent 0deg 39.45deg, rgba(255, 228, 172, .82) 39.5deg 40deg),
+        #1a0e08;
+      box-shadow: inset 0 0 35px rgba(0, 0, 0, .75);
+      transform: rotate(0deg);
+      will-change: transform;
+    }
+
+    .wheel::before {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: inset 0 0 0 clamp(2px, .35vw, 4px) rgba(248, 183, 71, .12), inset 0 0 30px rgba(0, 0, 0, .58);
+      content: "";
+      pointer-events: none;
+    }
+
+    .slice {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      clip-path: polygon(50% 50%, 32.9% 3%, 67.1% 3%);
+      transform: rotate(calc(var(--index) * 40deg));
+      transform-origin: 50% 50%;
+    }
+
+    .slice::after {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 50%;
+      background: rgba(255, 228, 172, .8);
+      box-shadow: 0 0 3px rgba(0,0,0,.75);
+      content: "";
+      transform: translateX(-50%) rotate(-20deg);
+      transform-origin: 50% 100%;
+    }
+
+    .photo-wrap {
+      position: absolute;
+      z-index: 1;
+      width: 18%;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: clamp(2px, .3vw, 3px) solid rgba(255, 246, 225, .9);
+      border-radius: 50%;
+      background: #8e4b1a;
+      box-shadow: 0 3px 7px rgba(0, 0, 0, .6), 0 0 0 2px rgba(205, 130, 41, .58);
+      transform: translate(-50%, -50%);
+    }
+
+    .photo-wrap img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      transform: scale(1.03);
+    }
+
+    .label {
+      position: absolute;
+      z-index: 1;
+      width: 20%;
+      color: #fff4e2;
+      font-family: "Kalam", "Noto Sans Thai", cursive;
+      font-size: clamp(.6rem, 1.25vw, .9rem);
+      font-weight: 700;
+      line-height: 1.05;
+      text-align: center;
+      text-shadow: 0 2px 3px rgba(0, 0, 0, .95);
+      transform: translate(-50%, -50%);
+    }
+
+    .hub {
+      position: absolute;
+      z-index: 4;
+      top: 50%;
+      left: 50%;
+      width: clamp(36px, 6.5vw, 49px);
+      aspect-ratio: 1;
+      border: 2px solid #f8cc79;
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 30%, #ffdc88, #e59624 63%, #a34b0a);
+      box-shadow: 0 3px 9px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.55);
+      transform: translate(-50%, -50%);
+    }
+
+    .spin-button {
+      position: relative;
+      z-index: 6;
+      min-width: 176px;
+      margin-top: clamp(10px, 1.6vh, 16px);
+      padding: 12px 30px 11px;
+      border: 1px solid #ffe0a1;
+      border-radius: 999px;
+      color: #351505;
+      background: linear-gradient(145deg, #ffd47a, #ed9b31 52%, #b96318);
+      box-shadow: 0 7px 15px rgba(0,0,0,.36), inset 0 1px rgba(255,255,255,.64);
+      cursor: pointer;
+      font-family: "Noto Sans Thai", "DM Sans", sans-serif;
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      transition: transform .2s ease, filter .2s ease, opacity .2s ease;
+    }
+
+    .spin-button:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-2px); }
+    .spin-button:active:not(:disabled) { transform: translateY(1px); }
+    .spin-button:focus-visible { outline: 3px solid #ffe3a7; outline-offset: 4px; }
+    .spin-button:disabled { cursor: wait; opacity: .72; }
+
+    .modal-backdrop {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: rgba(9, 3, 1, .46);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+
+    .modal-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+    .result-card {
+      position: relative;
+      width: min(100%, 480px);
+      padding: 29px clamp(25px, 5.5vw, 45px) 27px;
+      overflow: hidden;
+      border: 2px solid #ecaa42;
+      border-radius: 27px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 14%, rgba(135, 65, 18, .55), transparent 46%),
+        linear-gradient(145deg, #321406, #160904 72%);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, .65), inset 0 1px rgba(255,232,175,.14);
+      transform: translateY(14px) scale(.97);
+      transition: transform .3s cubic-bezier(.2,.85,.25,1.2);
+    }
+
+    .modal-backdrop.visible .result-card { transform: translateY(0) scale(1); }
+
+    .result-kicker {
+      margin: 0 0 8px;
+      color: #f5bc5b;
+      font-family: "Noto Sans Thai", sans-serif;
+      font-size: .93rem;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .winner-photo {
+      display: block;
+      width: min(46vw, 180px);
+      aspect-ratio: 1;
+      margin: 7px auto 14px;
+      border: 4px solid #f7d297;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center center;
+      box-shadow: 0 5px 18px rgba(0,0,0,.5), 0 0 0 3px rgba(203,129,36,.55);
+    }
+
+    .winner-name {
+      margin: 0;
+      color: #fff2de;
+      font-family: "Kalam", "Noto Sans Thai", cursive;
+      font-size: clamp(1.9rem, 6vw, 2.7rem);
+      line-height: 1.05;
+      text-shadow: 0 3px 5px rgba(0,0,0,.55);
+    }
+
+    .ok-button {
+      min-width: 190px;
+      margin-top: 21px;
+      padding: 10px 29px;
+      border: 1px solid #ffe2a5;
+      border-radius: 999px;
+      color: #3b1805;
+      background: linear-gradient(145deg, #ffd680, #d78324);
+      box-shadow: inset 0 1px rgba(255,255,255,.6), 0 4px 10px rgba(0,0,0,.28);
+      cursor: pointer;
+      font: 700 1.1rem "Noto Sans Thai", sans-serif;
+      transition: filter .2s ease, transform .2s ease;
+    }
+
+    .ok-button:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 560px) {
+      :root { --wheel-size: min(92vw, 510px); }
+      .page { padding-top: 25px; }
+      .wheel-area { margin-top: 13px; padding: 18px 3px; }
+      .pointer { top: 3px; }
+      .label { font-size: clamp(.61rem, 3.35vw, .92rem); }
+      .spin-button { margin-top: 6px; }
+      .result-card { border-radius: 23px; }
+    }
+
+    @media (max-height: 720px) and (min-width: 700px) {
+      :root { --wheel-size: min(68vh, 590px); }
+      .page { padding-top: 18px; padding-bottom: 16px; }
+      .subtitle { margin-top: 7px; }
+      .wheel-area { margin-top: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <h1><span>✦</span>Latte Art<span>✦</span></h1>
+      <p class="subtitle">หมุนวงล้อเพื่อสุ่มเลือกลายลาเต้อาร์ต</p>
+    </header>
+
+    <section class="wheel-area" aria-label="Latte art randomizer">
+      <div class="pointer" aria-hidden="true"></div>
+      <div class="wheel-shell">
+        <div class="wheel" id="wheel" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <button class="spin-button" id="spinButton" type="button">หมุนวงล้อ</button>
+  </main>
+
+  <div class="modal-backdrop" id="modal" aria-hidden="true" role="presentation">
+    <section class="result-card" role="dialog" aria-modal="true" aria-labelledby="winnerName">
+      <p class="result-kicker">Your latte art is</p>
+      <img class="winner-photo" id="winnerPhoto" src="" alt="" />
+      <h2 class="winner-name" id="winnerName"></h2>
+      <button class="ok-button" id="okButton" type="button">ตกลง</button>
+    </section>
+  </div>
+
+  <script>
+    const choices = [
+      { name: "Rosetta", photo: "assets/tight/rosetta.png" },
+      { name: "Framed Tulip", photo: "assets/tight/framed-tulip.png" },
+      { name: "Wingsetta", photo: "assets/tight/wingsetta.png" },
+      { name: "Rose", photo: "assets/tight/rose.png" },
+      { name: "Framed Heart", photo: "assets/tight/framed-heart.png" },
+      { name: "Tulip", photo: "assets/tight/tulip.png" },
+      { name: "Heart", photo: "assets/tight/heart.png" },
+      { name: "Framed Rosetta", photo: "assets/tight/framed-rosetta.jpg" },
+      { name: "Swan", photo: "assets/tight/swan.png" }
+    ];
+
+    const wheel = document.getElementById("wheel");
+    const spinButton = document.getElementById("spinButton");
+    const modal = document.getElementById("modal");
+    const okButton = document.getElementById("okButton");
+    const winnerName = document.getElementById("winnerName");
+    const winnerPhoto = document.getElementById("winnerPhoto");
+    const sector = 360 / choices.length;
+    let rotation = 0;
+    let spinning = false;
+    let continuousSpinTimer = null;
+
+    choices.forEach((choice, index) => {
+      const slice = document.createElement("article");
+      slice.className = "slice";
+      slice.style.setProperty("--index", index);
+      wheel.appendChild(slice);
+
+      // Photos sit near the rim; their labels sit on the matching inner slice.
+      const angle = (index * sector * Math.PI) / 180;
+      const pointOnWheel = (radius) => ({
+        left: 50 + Math.sin(angle) * radius,
+        top: 50 - Math.cos(angle) * radius
+      });
+      const photoPoint = pointOnWheel(32);
+      const labelPoint = pointOnWheel(20.5);
+
+      const photoWrap = document.createElement("div");
+      photoWrap.className = "photo-wrap";
+      photoWrap.style.left = `${photoPoint.left}%`;
+      photoWrap.style.top = `${photoPoint.top}%`;
+      const image = document.createElement("img");
+      image.src = choice.photo;
+      image.alt = `${choice.name} latte art`;
+      photoWrap.appendChild(image);
+      wheel.appendChild(photoWrap);
+
+      const label = document.createElement("div");
+      label.className = "label";
+      label.style.left = `${labelPoint.left}%`;
+      label.style.top = `${labelPoint.top}%`;
+      label.textContent = choice.name;
+      wheel.appendChild(label);
+    });
+
+    const hub = document.createElement("div");
+    hub.className = "hub";
+    hub.setAttribute("aria-hidden", "true");
+    wheel.appendChild(hub);
+
+    function showResult(choice) {
+      winnerName.textContent = choice.name;
+      winnerPhoto.src = choice.photo;
+      winnerPhoto.alt = `${choice.name} latte art`;
+      modal.classList.add("visible");
+      modal.setAttribute("aria-hidden", "false");
+      okButton.focus();
+    }
+
+    function hideResult() {
+      modal.classList.remove("visible");
+      modal.setAttribute("aria-hidden", "true");
+      startContinuousSpin();
+      spinButton.focus();
+    }
+
+    function startContinuousSpin() {
+      spinning = true;
+      spinButton.textContent = "สุ่มลาย";
+      wheel.style.transition = "transform 12s linear";
+
+      const turn = () => {
+        rotation += 360;
+        wheel.style.transform = `rotate(${rotation}deg)`;
+      };
+
+      turn();
+      continuousSpinTimer = window.setInterval(turn, 11500);
+    }
+
+    function stopAndPickWinner() {
+      window.clearInterval(continuousSpinTimer);
+      continuousSpinTimer = null;
+      spinButton.disabled = true;
+      spinButton.textContent = "กำลังสุ่ม...";
+
+      const winnerIndex = Math.floor(Math.random() * choices.length);
+      // One uninterrupted motion: fast at the start, then easing to the result.
+      const targetAtPointer = (360 - winnerIndex * sector) % 360;
+      const currentAngle = ((rotation % 360) + 360) % 360;
+      const adjustment = (targetAtPointer - currentAngle + 360) % 360;
+      rotation += 6 * 360 + adjustment;
+      wheel.style.transition = "transform 5.2s cubic-bezier(.08, .76, .14, 1)";
+      wheel.style.transform = `rotate(${rotation}deg)`;
+
+      const finishSpin = () => {
+        wheel.removeEventListener("transitionend", finishSpin);
+        spinning = false;
+        spinButton.disabled = false;
+        showResult(choices[winnerIndex]);
+      };
+      wheel.addEventListener("transitionend", finishSpin);
+    }
+
+    spinButton.addEventListener("click", () => {
+      if (spinning) stopAndPickWinner();
+      else startContinuousSpin();
+    });
+    okButton.addEventListener("click", hideResult);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) hideResult();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.classList.contains("visible")) hideResult();
+    });
+
+    startContinuousSpin();
+  </script>
+</body>
+</html>

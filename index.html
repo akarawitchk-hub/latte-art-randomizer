@@ -1,533 +1,847 @@
-<!doctype html>
-<html lang="en">
+
+<!DOCTYPE html>
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1b0b05" />
-  <title>Latte Art</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Kalam:wght@400;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coffee Tournament</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#2b190f;color:#fff;
+  font-family:Arial,sans-serif;
+  background-image:
+    radial-gradient(ellipse at 10% 10%,#75462655,transparent 35%),
+    radial-gradient(ellipse at 90% 90%,#75462644,transparent 35%);
+}
+header{text-align:center;padding:24px 10px 8px}
+h1{margin:0;color:#f4d6a6;font-size:clamp(23px,3vw,38px);letter-spacing:3px}
+header p{color:#bd9163;font-size:12px;letter-spacing:3px}
+.hint{text-align:center;color:#d8b58b;font-size:13px;padding:8px}
+.viewport{overflow:auto;padding:15px 20px 35px}
+.board{
+  position:relative;
+  width:1900px;height:1120px;
+  margin:auto;
+}
+.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wires path{fill:none;stroke:#d9b17c;stroke-width:2}
+.round-title{
+  position:absolute;top:-24px;
+  color:#d8b58b;font-size:12px;
+  white-space:nowrap;
+  z-index:3;
+  background:#2b190f;
+  padding:2px 5px;
+  border-radius:4px;
+}
+.match{
+  position:absolute;width:170px;height:64px;
+  background:#393431;
+  border:1.5px solid #83776d;
+  border-radius:12px;
+  box-shadow:0 4px 12px #160c0880;
+}
+.match.final-match{width:190px}
+.teams{height:100%;display:flex;flex-direction:column}
+.team{
+  flex:1;min-height:0;width:100%;
+  border:0;background:#514c48;color:white;
+  padding:0 12px;text-align:left;
+  font-size:13px;cursor:pointer;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.team:first-child{border-radius:10px 10px 0 0}
+.team:last-child{border-radius:0 0 10px 10px}
+.team+ .team{border-top:1px solid #70665d}
+/* ไม่เปลี่ยนสีช่องทีมเมื่อเลื่อนเมาส์ไปชี้ */
+.team:hover:not(:disabled):not(.winner) {
+  background: #514c48;
+  color: white;
+}
+.team.winner:hover:not(:disabled) {
+  background: #f1d18e;
+  color: #4c301b;
+}
 
-    :root {
-      --cream: #fff1dd;
-      --gold: #f5b13f;
-      --gold-light: #ffd17b;
-      --gold-deep: #be7520;
-      --cocoa: #1b0b05;
-      --cocoa-mid: #2d1208;
-      --cocoa-soft: #4a2410;
-      --wheel-size: clamp(340px, min(75vw, 72vh), 680px);
-    }
+/* ไม่ให้แถบดำแสดงตอนชี้ช่องปกติ */
+.team:not(.reveal)::after {
+  display: none;
+}
+.team.winner{background:#f1d18e;color:#4c301b;font-weight:bold}
+.team:disabled{cursor:default}
+.coffee {
+  position: absolute;
+  z-index: 3;
+  top: -55px;
+  left: 50%;
+  transform: translateX(-50%);
 
-    * { box-sizing: border-box; }
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid #f4d9ac;
 
-    html { min-height: 100%; }
+  background: radial-gradient(
+    circle at 35% 30%,
+    #bd8952,
+    #71401f
+  );
 
-    body {
-      min-width: 320px;
-      min-height: 100vh;
-      min-height: 100svh;
-      margin: 0;
-      overflow-x: hidden;
-      color: var(--cream);
-      font-family: "DM Sans", "Noto Sans Thai", sans-serif;
-      background:
-        radial-gradient(circle at 50% 43%, rgba(121, 58, 19, .27) 0, rgba(48, 19, 7, .09) 29%, transparent 53%),
-        radial-gradient(circle at 14% 7%, rgba(125, 64, 20, .22), transparent 23%),
-        radial-gradient(circle at 87% 85%, rgba(105, 49, 16, .17), transparent 25%),
-        linear-gradient(135deg, #130703 0%, #2d1309 49%, #160803 100%);
-    }
+  box-shadow: 0 3px 10px #160b07a0;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  color: #fff3df;
+  font-size: 25px;
+}
+.coffee span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 1px #fff);
+}
+.coffee img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.coffee:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.pattern-name {
+  position: absolute;
+  z-index: 4;
+  top: -39px;
+  left: calc(50% + 30px);
+  max-width: 105px;
+  padding: 5px 8px;
+  border: 1px solid #b98b59;
+  border-radius: 8px;
+  background: #3b2417ee;
+  color: #f4d6a6;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px #160b0780;
+  pointer-events: none;
+}
+.pattern-name:empty { display: none; }
+.coffee-hint {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #f4d6a6;
+  font-size: 9px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.champion{
+  width:280px;margin:8px auto 25px;
+  padding:16px;border:1px solid #a77946;
+  border-radius:14px;background:#40291b;text-align:center;
+  color:#f3d29a;
+}
+.champion strong{font-size:14px}
+#championName{
+  margin-top:12px;padding:12px;
+  background:#514c48;border-radius:8px;color:white;
+}
+#championName.crowned{background:#f1d18e;color:#4c301b;font-weight:bold}
+.reset{
+  display:block;margin:0 auto 30px;
+  border:1px solid #c19763;border-radius:24px;
+  padding:10px 20px;color:#f4d6a6;background:transparent;
+  cursor:pointer;
+}
+.team {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
 
-    body::before,
-    body::after {
-      position: fixed;
-      z-index: -1;
-      width: 52vw;
-      height: 52vw;
-      border: 1px solid rgba(250, 183, 68, .055);
-      border-radius: 50%;
-      content: "";
-      pointer-events: none;
-    }
+.team.reveal {
+  animation: revealText 1s ease-in-out;
+}
 
-    body::before { top: -36vw; left: -25vw; }
-    body::after { right: -28vw; bottom: -36vw; }
+.team.reveal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 2;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: blackWipe 1s ease-in-out forwards;
+  pointer-events: none;
+}
 
-    .page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      min-height: 100svh;
-      padding: clamp(26px, 4vh, 44px) 18px 32px;
-    }
+.team {
+  position: relative;
+  isolation: isolate;
+}
 
-    .masthead {
-      text-align: center;
-      animation: reveal .7s ease-out both;
-    }
+.team.reveal {
+  animation: textReveal 1s linear;
+}
 
-    h1 {
-      margin: 0;
-      color: var(--cream);
-      font-family: "Kalam", "Noto Sans Thai", cursive;
-      font-size: clamp(2.25rem, 5.3vw, 4rem);
-      font-weight: 700;
-      letter-spacing: .025em;
-      line-height: 1;
-      text-shadow: 0 3px 18px rgba(0, 0, 0, .4);
-    }
+.team.reveal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000;
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+  animation: blackBar 1s ease-in-out forwards;
+}
 
-    h1 span {
-      display: inline-block;
-      margin: 0 .17em;
-      color: var(--gold-light);
-      font-family: Arial, sans-serif;
-      font-size: .51em;
-      vertical-align: .14em;
-    }
+@keyframes blackBar {
+  0%   { transform: scaleX(0); transform-origin: left; }
+  45%  { transform: scaleX(1); transform-origin: left; }
+  55%  { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
 
-    .subtitle {
-      margin: 12px 0 0;
-      color: rgba(255, 240, 220, .9);
-      font-family: "Noto Sans Thai", sans-serif;
-      font-size: clamp(.94rem, 2.2vw, 1.25rem);
-      font-weight: 500;
-    }
+@keyframes textReveal {
+  0%, 55% { color: transparent; }
+  100% { color: white; }
+}
 
-    .wheel-area {
-      display: grid;
-      place-items: center;
-      position: relative;
-      width: min(100%, 700px);
-      min-height: var(--wheel-size);
-      margin-top: clamp(18px, 3.2vh, 32px);
-      padding: 20px;
-    }
+/* เอฟเฟกต์ลาย Latte Art ที่หน้าจอโชว์ */
+.coffee.pattern-reveal img {
+  animation: patternReveal 1.05s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes patternReveal {
+  0% { opacity: .15; transform: rotate(-120deg) scale(.35); filter: blur(5px); }
+  65% { opacity: 1; transform: rotate(12deg) scale(1.12); filter: blur(0); }
+  100% { opacity: 1; transform: rotate(0) scale(1); filter: blur(0); }
+}
+.match { transition: transform .25s ease, box-shadow .25s ease; }
 
-    .pointer {
-      position: absolute;
-      z-index: 5;
-      top: 5px;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-top: clamp(43px, 5.15vw, 55px) solid var(--gold);
-      border-right: clamp(18px, 2.35vw, 25px) solid transparent;
-      border-bottom: 0;
-      border-left: clamp(18px, 2.35vw, 25px) solid transparent;
-      filter: drop-shadow(0 5px 3px rgba(0, 0, 0, .42));
-      transform: translateX(-50%);
-    }
-
-    .pointer::after {
-      position: absolute;
-      top: clamp(7px, 1.1vw, 10px);
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-right: clamp(8px, 1vw, 11px) solid transparent;
-      border-top: clamp(25px, 3vw, 32px) solid rgba(255, 221, 142, .52);
-      border-bottom: 0;
-      border-left: clamp(8px, 1vw, 11px) solid transparent;
-      content: "";
-      transform: translateX(-50%);
-    }
-
-    .wheel-shell {
-      position: relative;
-      z-index: 1;
-      width: var(--wheel-size);
-      height: var(--wheel-size);
-      padding: clamp(7px, .85vw, 10px);
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ffd786 3%, #ca7a22 42%, #f7bd55 71%, #9a4e12 100%);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, .52), 0 0 0 2px rgba(255, 209, 116, .15), inset 0 1px rgba(255,255,255,.36);
-    }
-
-    .wheel {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      border: 2px solid rgba(255, 239, 204, .75);
-      border-radius: 50%;
-      background:
-        repeating-conic-gradient(from -20deg, transparent 0deg 39.45deg, rgba(255, 228, 172, .82) 39.5deg 40deg),
-        #1a0e08;
-      box-shadow: inset 0 0 35px rgba(0, 0, 0, .75);
-      transform: rotate(0deg);
-      will-change: transform;
-    }
-
-    .wheel::before {
-      position: absolute;
-      z-index: 3;
-      inset: 0;
-      border-radius: inherit;
-      box-shadow: inset 0 0 0 clamp(2px, .35vw, 4px) rgba(248, 183, 71, .12), inset 0 0 30px rgba(0, 0, 0, .58);
-      content: "";
-      pointer-events: none;
-    }
-
-    .slice {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      clip-path: polygon(50% 50%, 32.9% 3%, 67.1% 3%);
-      transform: rotate(calc(var(--index) * 40deg));
-      transform-origin: 50% 50%;
-    }
-
-    .slice::after {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 1px;
-      height: 50%;
-      background: rgba(255, 228, 172, .8);
-      box-shadow: 0 0 3px rgba(0,0,0,.75);
-      content: "";
-      transform: translateX(-50%) rotate(-20deg);
-      transform-origin: 50% 100%;
-    }
-
-    .photo-wrap {
-      position: absolute;
-      z-index: 1;
-      width: 18%;
-      aspect-ratio: 1;
-      overflow: hidden;
-      border: clamp(2px, .3vw, 3px) solid rgba(255, 246, 225, .9);
-      border-radius: 50%;
-      background: #8e4b1a;
-      box-shadow: 0 3px 7px rgba(0, 0, 0, .6), 0 0 0 2px rgba(205, 130, 41, .58);
-      transform: translate(-50%, -50%);
-    }
-
-    .photo-wrap img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      transform: scale(1.03);
-    }
-
-    .label {
-      position: absolute;
-      z-index: 1;
-      width: 20%;
-      color: #fff4e2;
-      font-family: "Kalam", "Noto Sans Thai", cursive;
-      font-size: clamp(.6rem, 1.25vw, .9rem);
-      font-weight: 700;
-      line-height: 1.05;
-      text-align: center;
-      text-shadow: 0 2px 3px rgba(0, 0, 0, .95);
-      transform: translate(-50%, -50%);
-    }
-
-    .hub {
-      position: absolute;
-      z-index: 4;
-      top: 50%;
-      left: 50%;
-      width: clamp(36px, 6.5vw, 49px);
-      aspect-ratio: 1;
-      border: 2px solid #f8cc79;
-      border-radius: 50%;
-      background: radial-gradient(circle at 34% 30%, #ffdc88, #e59624 63%, #a34b0a);
-      box-shadow: 0 3px 9px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.55);
-      transform: translate(-50%, -50%);
-    }
-
-    .spin-button {
-      position: relative;
-      z-index: 6;
-      min-width: 176px;
-      margin-top: clamp(10px, 1.6vh, 16px);
-      padding: 12px 30px 11px;
-      border: 1px solid #ffe0a1;
-      border-radius: 999px;
-      color: #351505;
-      background: linear-gradient(145deg, #ffd47a, #ed9b31 52%, #b96318);
-      box-shadow: 0 7px 15px rgba(0,0,0,.36), inset 0 1px rgba(255,255,255,.64);
-      cursor: pointer;
-      font-family: "Noto Sans Thai", "DM Sans", sans-serif;
-      font-size: 1.02rem;
-      font-weight: 700;
-      letter-spacing: .02em;
-      transition: transform .2s ease, filter .2s ease, opacity .2s ease;
-    }
-
-    .spin-button:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-2px); }
-    .spin-button:active:not(:disabled) { transform: translateY(1px); }
-    .spin-button:focus-visible { outline: 3px solid #ffe3a7; outline-offset: 4px; }
-    .spin-button:disabled { cursor: wait; opacity: .72; }
-
-    .modal-backdrop {
-      position: fixed;
-      z-index: 20;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 22px;
-      background: rgba(9, 3, 1, .46);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s ease;
-    }
-
-    .modal-backdrop.visible { opacity: 1; pointer-events: auto; }
-
-    .result-card {
-      position: relative;
-      width: min(100%, 480px);
-      padding: 29px clamp(25px, 5.5vw, 45px) 27px;
-      overflow: hidden;
-      border: 2px solid #ecaa42;
-      border-radius: 27px;
-      text-align: center;
-      background:
-        radial-gradient(circle at 50% 14%, rgba(135, 65, 18, .55), transparent 46%),
-        linear-gradient(145deg, #321406, #160904 72%);
-      box-shadow: 0 22px 60px rgba(0, 0, 0, .65), inset 0 1px rgba(255,232,175,.14);
-      transform: translateY(14px) scale(.97);
-      transition: transform .3s cubic-bezier(.2,.85,.25,1.2);
-    }
-
-    .modal-backdrop.visible .result-card { transform: translateY(0) scale(1); }
-
-    .result-kicker {
-      margin: 0 0 8px;
-      color: #f5bc5b;
-      font-family: "Noto Sans Thai", sans-serif;
-      font-size: .93rem;
-      font-weight: 600;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-    }
-
-    .winner-photo {
-      display: block;
-      width: min(46vw, 180px);
-      aspect-ratio: 1;
-      margin: 7px auto 14px;
-      border: 4px solid #f7d297;
-      border-radius: 50%;
-      object-fit: cover;
-      object-position: center center;
-      box-shadow: 0 5px 18px rgba(0,0,0,.5), 0 0 0 3px rgba(203,129,36,.55);
-    }
-
-    .winner-name {
-      margin: 0;
-      color: #fff2de;
-      font-family: "Kalam", "Noto Sans Thai", cursive;
-      font-size: clamp(1.9rem, 6vw, 2.7rem);
-      line-height: 1.05;
-      text-shadow: 0 3px 5px rgba(0,0,0,.55);
-    }
-
-    .ok-button {
-      min-width: 190px;
-      margin-top: 21px;
-      padding: 10px 29px;
-      border: 1px solid #ffe2a5;
-      border-radius: 999px;
-      color: #3b1805;
-      background: linear-gradient(145deg, #ffd680, #d78324);
-      box-shadow: inset 0 1px rgba(255,255,255,.6), 0 4px 10px rgba(0,0,0,.28);
-      cursor: pointer;
-      font: 700 1.1rem "Noto Sans Thai", sans-serif;
-      transition: filter .2s ease, transform .2s ease;
-    }
-
-    .ok-button:hover { filter: brightness(1.07); transform: translateY(-1px); }
-
-    @keyframes reveal {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 560px) {
-      :root { --wheel-size: min(92vw, 510px); }
-      .page { padding-top: 25px; }
-      .wheel-area { margin-top: 13px; padding: 18px 3px; }
-      .pointer { top: 3px; }
-      .label { font-size: clamp(.61rem, 3.35vw, .92rem); }
-      .spin-button { margin-top: 6px; }
-      .result-card { border-radius: 23px; }
-    }
-
-    @media (max-height: 720px) and (min-width: 700px) {
-      :root { --wheel-size: min(68vh, 590px); }
-      .page { padding-top: 18px; padding-bottom: 16px; }
-      .subtitle { margin-top: 7px; }
-      .wheel-area { margin-top: 10px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
-    }
-  </style>
+.mode-bar{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:12px}
+.mode-bar a,.mode-bar button{border:1px solid #c19763;border-radius:24px;padding:10px 16px;color:#f4d6a6;background:#40291b;text-decoration:none;cursor:pointer;font-size:14px}
+.mode-bar .active{background:#f1d18e;color:#4c301b;font-weight:bold}
+.mode-status{text-align:center;color:#d8b58b;font-size:12px;padding:0 12px 8px}
+.control-panel{max-width:1000px;margin:0 auto 24px;padding:16px;border:1px solid #a77946;border-radius:14px;background:#40291b}
+.control-panel h2{margin:0 0 12px;text-align:center;font-size:18px;color:#f4d6a6}
+.team-edit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.team-edit-grid input{width:100%;padding:9px;border-radius:7px;border:1px solid #8e6a48;background:#fff8ef;color:#2b190f}
+.panel-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.panel-actions button{border:1px solid #c19763;border-radius:22px;padding:10px 16px;color:#f4d6a6;background:#514033;cursor:pointer}
+.panel-actions .primary{background:#f1d18e;color:#4c301b;font-weight:bold}
+body.show-mode .team{pointer-events:none;cursor:default}
+body.show-mode .coffee{pointer-events:none;cursor:default}
+@media(max-width:700px){.control-panel{margin:0 10px 20px}.board{transform-origin:top left}}
+ 
+.display-admin{margin:16px 0;padding:14px;border:1px solid #8d6848;border-radius:12px;background:#332116;display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+.display-admin h3{width:100%;margin:0;color:#f4d6a6}.display-admin label{display:flex;flex-direction:column;gap:6px;color:#e5c39b;font-size:13px}.display-admin select{padding:9px;border-radius:8px;background:#fff8ef;color:#3d281a;border:1px solid #c19763}.display-admin .display-lock{flex-direction:row;align-items:center}.display-admin .display-lock input{width:18px;height:18px}.display-help{width:100%;font-size:12px;color:#d8b58b;margin:0}.ranking-view{max-width:1000px;margin:10px auto 30px;padding:18px;background:#40291b;border:1px solid #a77946;border-radius:14px}
+.ranking-view h2,.ranking-view p{text-align:center;color:#f4d6a6}
+.ranking-view p{font-size:13px;color:#d8b58b}
+.rank-row{display:grid;grid-template-columns:90px 1fr 150px;gap:12px;align-items:center;padding:12px;border-bottom:1px solid #72543b}
+.rank-row:last-child{border-bottom:0}
+.rank-number{font-weight:bold;color:#f1d18e}
+.rank-team{overflow-wrap:anywhere}
+.rank-status{color:#d8b58b;font-size:12px;text-align:right}
+@media(max-width:600px){.rank-row{grid-template-columns:60px 1fr}.rank-status{grid-column:2;text-align:left}}
+</style>
 </head>
 <body>
-  <main class="page">
-    <header class="masthead">
-      <h1><span>✦</span>Latte Art<span>✦</span></h1>
-      <p class="subtitle">หมุนวงล้อเพื่อสุ่มเลือกลายลาเต้อาร์ต</p>
-    </header>
 
-    <section class="wheel-area" aria-label="Latte art randomizer">
-      <div class="pointer" aria-hidden="true"></div>
-      <div class="wheel-shell">
-        <div class="wheel" id="wheel" aria-live="polite"></div>
-      </div>
-    </section>
+<header>
+  <h1> COFFEE TOURNAMENT</h1>
+  <p>LATTE ART </p>
+</header>
 
-    <button class="spin-button" id="spinButton" type="button">หมุนวงล้อ</button>
-  </main>
-
-  <div class="modal-backdrop" id="modal" aria-hidden="true" role="presentation">
-    <section class="result-card" role="dialog" aria-modal="true" aria-labelledby="winnerName">
-      <p class="result-kicker">Your latte art is</p>
-      <img class="winner-photo" id="winnerPhoto" src="" alt="" />
-      <h2 class="winner-name" id="winnerName"></h2>
-      <button class="ok-button" id="okButton" type="button">ตกลง</button>
-    </section>
+<nav class="mode-bar" id="modeBar">
+  <button id="openShowWindow" class="active" type="button">เปิดหน้าต่างโชว์</button>
+  <button id="copyShow" type="button">คัดลอกลิงก์จอโชว์</button>
+</nav>
+<div class="mode-status" id="modeStatus"></div>
+<section class="control-panel" id="controlPanel" hidden>
+  <h2>แผงควบคุมการแข่งขัน</h2>
+  <p style="text-align:center;font-size:13px;color:#d8b58b"></p>
+  <div class="team-edit-grid" id="teamEditGrid"></div>
+  <div class="display-admin" id="displayAdmin">
+    <h3>ตั้งค่าหน้าจอโชว์</h3>
+    <label>หน้าที่ให้แสดง
+      <select id="displayPage">
+        <option value="auto">สลับอัตโนมัติ</option>
+        <option value="bracket">สายการแข่งขันเท่านั้น</option>
+        <option value="ranking">ตารางอันดับเท่านั้น</option>
+      </select>
+    </label>
+    <label>สลับหน้าทุก
+      <select id="displayInterval">
+        <option value="10">10 วินาที</option><option value="15" selected>15 วินาที</option>
+        <option value="30">30 วินาที</option><option value="60">60 วินาที</option>
+      </select>
+    </label>
+    <label class="display-lock"><input type="checkbox" id="displayLock"> ล็อกหน้าจอโชว์ (หยุดสลับอัตโนมัติ)</label>
+    <button type="button" class="primary" id="saveDisplaySettings">บันทึกการตั้งค่าจอโชว์</button>
+    <p class="display-help">เลือกหน้าใดหน้าหนึ่งเพื่อบังคับจอโชว์ หรือเลือกสลับอัตโนมัติ หากล็อกไว้ระบบจะค้างหน้าที่กำหนด</p>
   </div>
+  <div class="panel-actions">
+    <button class="primary" id="saveNames" type="button">บันทึกชื่อทีม</button>
+    <button id="resetButton" type="button">รีเซ็ตการแข่งขัน</button>
+  </div>
+</section>
 
-  <script>
-    const choices = [
-      { name: "Rosetta", photo: "assets/tight/rosetta.png" },
-      { name: "Framed Tulip", photo: "assets/tight/framed-tulip.png" },
-      { name: "Wingsetta", photo: "assets/tight/wingsetta.png" },
-      { name: "Rose", photo: "assets/tight/rose.png" },
-      { name: "Framed Heart", photo: "assets/tight/framed-heart.png" },
-      { name: "Tulip", photo: "assets/tight/tulip.png" },
-      { name: "Heart", photo: "assets/tight/heart.png" },
-      { name: "Framed Rosetta", photo: "assets/tight/framed-rosetta.jpg" },
-      { name: "Swan", photo: "assets/tight/swan.png" }
-    ];
+<nav class="mode-bar" id="viewBar">
+  <button type="button" id="showBracket" class="active">สายการแข่งขัน</button>
+  <button type="button" id="showRanking">ตารางอันดับ</button>
+</nav>
+<section id="rankingView" class="ranking-view" hidden>
+  <h2>ตารางอันดับ 32 ทีม</h2>
+  <p>แสดงอันดับ 1–32 ผู้ชนะจะขยับขึ้นด้านบน ส่วนทีมที่แพ้จะเลื่อนลงด้านล่าง</p>
+  <div id="rankingTable"></div>
+</section>
+<div class="viewport" id="bracketViewport">
+  <div class="board" id="board">
+    <svg class="wires" id="wires" viewBox="0 0 1900 1120"></svg>
+  </div>
+</div>
 
-    const wheel = document.getElementById("wheel");
-    const spinButton = document.getElementById("spinButton");
-    const modal = document.getElementById("modal");
-    const okButton = document.getElementById("okButton");
-    const winnerName = document.getElementById("winnerName");
-    const winnerPhoto = document.getElementById("winnerPhoto");
-    const sector = 360 / choices.length;
-    let rotation = 0;
-    let spinning = false;
-    let continuousSpinTimer = null;
+<script>
+function teamLabel(index) {
+  let n = index + 1, label = "";
+  while (n > 0) { n--; label = String.fromCharCode(65 + (n % 26)) + label; n = Math.floor(n / 26); }
+  return `Team ${label}`;
+}
+const teamNames = Array.from({ length: 32 }, (_, i) => teamLabel(i));
 
-    choices.forEach((choice, index) => {
-      const slice = document.createElement("article");
-      slice.className = "slice";
-      slice.style.setProperty("--index", index);
-      wheel.appendChild(slice);
+const matches = {};
+const board = document.getElementById("board");
+const STORAGE_KEY = "coffee-tournament-state-v2";
+const DISPLAY_KEY = "coffee-tournament-display-v1";
+let displayConfig = { page: "auto", interval: 15, locked: false };
+let displayTimer = null;
+const params = new URLSearchParams(location.search);
+// เปิดไฟล์แบบไม่มีพารามิเตอร์ให้เข้าหน้าควบคุมเป็นค่าเริ่มต้น
+const mode = params.get("mode") === "show" ? "show" : "control";
+const isControl = mode === "control";
+document.body.classList.toggle("show-mode", !isControl);
+document.getElementById("controlPanel").hidden = !isControl;
+document.getElementById("openShowWindow").hidden = !isControl;
+document.getElementById("copyShow").hidden = !isControl;
+document.getElementById("viewBar").hidden = !isControl;
+document.getElementById("displayAdmin").hidden = !isControl;
+document.getElementById("modeStatus").textContent = isControl
+  ? ""
+  : " ";
 
-      // Photos sit near the rim; their labels sit on the matching inner slice.
-      const angle = (index * sector * Math.PI) / 180;
-      const pointOnWheel = (radius) => ({
-        left: 50 + Math.sin(angle) * radius,
-        top: 50 - Math.cos(angle) * radius
+document.getElementById("openShowWindow").addEventListener("click", () => {
+  const url = new URL(location.href);
+  url.searchParams.set("mode", "show");
+  // ขอเปิดเป็นหน้าต่างใหม่ เบราว์เซอร์อาจเปิดเป็นแท็บตามการตั้งค่า
+  const popup = window.open(url.href, "CoffeeTournamentShow", "popup=yes,width=1500,height=900,resizable=yes,scrollbars=yes");
+  if (!popup) {
+    alert("เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups สำหรับหน้านี้ แล้วกดอีกครั้ง");
+  }
+});
+
+document.getElementById("copyShow").addEventListener("click", async () => {
+  const url = new URL(location.href);
+  url.searchParams.set("mode", "show");
+  try { await navigator.clipboard.writeText(url.href); alert("คัดลอกลิงก์จอโชว์แล้ว"); }
+  catch { prompt("คัดลอกลิงก์จอโชว์นี้", url.href); }
+});
+
+function saveState() {
+  const state = {
+    teamNames,
+    matches: Object.fromEntries(Object.entries(matches).map(([id, m]) => [id, {
+      teams: m.teams, winner: m.winner, pattern: m.pattern || null,
+      patternName: m.patternName || "", revealSlot: Number.isInteger(m.revealSlot) ? m.revealSlot : null
+    }]))
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadState() {
+  try {
+    const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (!state) return;
+    if (Array.isArray(state.teamNames) && state.teamNames.length === teamNames.length) {
+      state.teamNames.forEach((name, i) => teamNames[i] = name);
+    }
+    if (state.matches) {
+      for (const [id, saved] of Object.entries(state.matches)) {
+        if (!matches[id]) continue;
+        matches[id].teams = Array.isArray(saved.teams) ? saved.teams : matches[id].teams;
+        matches[id].winner = saved.winner ?? null;
+        matches[id].pattern = saved.pattern || null;
+        matches[id].patternName = saved.patternName || "";
+        matches[id].revealSlot = Number.isInteger(saved.revealSlot) ? saved.revealSlot : null;
+      }
+    }
+  } catch (error) { console.warn("อ่านข้อมูลการแข่งขันไม่สำเร็จ", error); }
+}
+
+function setVisiblePage(page) {
+  const showRanking = page === "ranking";
+  bracketViewport.hidden = showRanking;
+  rankingView.hidden = !showRanking;
+  document.getElementById("showBracket").classList.toggle("active", !showRanking);
+  document.getElementById("showRanking").classList.toggle("active", showRanking);
+  if (showRanking) renderRanking();
+}
+function applyDisplayConfig() {
+  if (displayTimer) { clearInterval(displayTimer); displayTimer = null; }
+  if (isControl) {
+    // แอดมินเป็นหน้าควบคุมตลอด ไม่สลับตามเวลา
+    document.getElementById("displayPage").value = displayConfig.page;
+    document.getElementById("displayInterval").value = String(displayConfig.interval);
+    document.getElementById("displayLock").checked = !!displayConfig.locked;
+    return;
+  }
+  // การเลือกหน้า/สลับเวลา มีผลเฉพาะหน้าจอโชว์เท่านั้น
+  if (displayConfig.page === "bracket") setVisiblePage("bracket");
+  else if (displayConfig.page === "ranking") setVisiblePage("ranking");
+  else if (displayConfig.locked) { /* ล็อกไว้: คงหน้าปัจจุบันบนจอโชว์ */ }
+  else {
+    displayTimer = setInterval(() => {
+      if (document.hidden) return;
+      setVisiblePage(rankingView.hidden ? "ranking" : "bracket");
+    }, Math.max(5, Number(displayConfig.interval) || 15) * 1000);
+  }
+}
+function loadDisplayConfig() {
+  try { const saved = JSON.parse(localStorage.getItem(DISPLAY_KEY) || "null"); if (saved) displayConfig = { ...displayConfig, ...saved }; } catch {}
+  applyDisplayConfig();
+}
+document.getElementById("saveDisplaySettings").addEventListener("click", () => {
+  displayConfig = { page: document.getElementById("displayPage").value, interval: Number(document.getElementById("displayInterval").value), locked: document.getElementById("displayLock").checked };
+  localStorage.setItem(DISPLAY_KEY, JSON.stringify(displayConfig));
+  applyDisplayConfig();
+  alert("บันทึกการตั้งค่าจอโชว์แล้ว");
+});
+
+window.addEventListener("storage", (event) => {
+  if (event.key === DISPLAY_KEY && event.newValue) {
+    try { displayConfig = { ...displayConfig, ...JSON.parse(event.newValue) }; applyDisplayConfig(); } catch {}
+    return;
+  }
+  if (event.key !== STORAGE_KEY || !event.newValue) return;
+  let incoming = null;
+  try { incoming = JSON.parse(event.newValue); } catch {}
+  if (!isControl && incoming?.matches) {
+    for (const [id, saved] of Object.entries(incoming.matches)) {
+      if (matches[id] && saved.pattern && saved.pattern !== matches[id].pattern) {
+        matches[id].patternChanged = true;
+      }
+    }
+  }
+  loadState();
+  render();
+  if (isControl) renderTeamEditor();
+});
+
+function addMatch(id, round, index, teams, x, y, side) {
+  matches[id] = {
+    id, round, index, teams, x, y, side,
+    winner: null
+  };
+}
+
+// สายการแข่งขัน 32 ทีม: ซ้าย 16 ทีม ขวา 16 ทีม
+// แต่ละรอบจัดตำแหน่งให้คู่ที่ป้อนเข้าหากันอยู่กึ่งกลางเดียวกัน
+const roundXs = { L: [10, 220, 430, 640], R: [1690, 1480, 1270, 1060] };
+const roundCounts = [8, 4, 2, 1];
+for (const side of ["L", "R"]) {
+  for (let round = 1; round <= 4; round++) {
+    const count = roundCounts[round - 1];
+    const step = 1080 / count;
+    const cardY = (i) => Math.round(step * (i + 0.5) - 32);
+    for (let i = 0; i < count; i++) {
+      const teamIndex = side === "L" ? i * 2 : 16 + i * 2;
+      const teams = round === 1
+        ? [teamNames[teamIndex], teamNames[teamIndex + 1]]
+        : ["", ""];
+      addMatch(`${side}${round}-${i}`, round, i, teams, roundXs[side][round - 1], cardY(i), side);
+    }
+  }
+}
+addMatch("FINAL", 5, 0, ["", ""], 850, 527, "C");
+
+// ระบุปลายทางของผู้ชนะอย่างชัดเจน
+function nextMatch(id) {
+  const m = matches[id];
+  if (m.round >= 5) return null;
+  if (m.round === 4) return { id: "FINAL", slot: m.side === "L" ? 0 : 1 };
+  return { id: `${m.side}${m.round + 1}-${Math.floor(m.index / 2)}`, slot: m.index % 2 };
+}
+
+// ล้างผลของรอบต่อ ๆ ไป เมื่อเปลี่ยนผู้ชนะ
+function clearDownstream(id) {
+  const next = nextMatch(id);
+  if (!next) return;
+
+  const target = matches[next.id];
+  target.teams[next.slot] = "";
+  target.winner = null;
+
+  clearDownstream(next.id);
+}
+
+// เลือกทีมที่ชนะ
+function chooseWinner(id, slot) {
+  if (!isControl) return;
+  const m = matches[id];
+  if (!m.teams[slot]) return;
+
+  // ล้างผลเดิมที่ได้รับผลกระทบ
+  clearDownstream(id);
+
+  m.winner = slot;
+
+  // ส่งทีมชนะไปยังช่องของรอบถัดไป
+  const next = nextMatch(id);
+
+  if (next) {
+    matches[next.id].teams[next.slot] = m.teams[slot];
+    matches[next.id].revealSlot = next.slot;
+  }
+
+  saveState();
+  render();
+}
+
+// รายการภาพลายลาเต้อาร์ต (ต้องมีโฟลเดอร์ assets/tight อยู่ข้างไฟล์ HTML)
+const lattePatterns = [
+  { path: "assets/tight/rosetta.png", name: "Rosetta" },
+  { path: "assets/tight/framed-tulip.png", name: "Framed Tulip" },
+  { path: "assets/tight/wingsetta.png", name: "Wingsetta" },
+  { path: "assets/tight/rose.png", name: "Rose" },
+  { path: "assets/tight/framed-heart.png", name: "Framed Heart" },
+  { path: "assets/tight/tulip.png", name: "Tulip" },
+  { path: "assets/tight/heart.png", name: "Heart" },
+  { path: "assets/tight/framed-rosetta.jpg", name: "Framed Rosetta" },
+  { path: "assets/tight/swan.png", name: "Swan" }
+];
+
+function randomizePattern(id, badge) {
+  if (!isControl) return;
+  const m = matches[id];
+  if (!m || m.spinning) return; // ป้องกันการกดซ้ำระหว่างกำลังสุ่ม
+
+  m.spinning = true;
+  badge.disabled = true;
+  badge.setAttribute("aria-label", "กำลังสุ่มลายลาเต้อาร์ต");
+  badge.title = "กำลังสุ่ม...";
+
+  // เลือกลายปลายทาง โดยพยายามไม่ให้ซ้ำกับลายก่อนหน้า
+  const choices = lattePatterns.filter(item => item.path !== m.pattern);
+  const pool = choices.length ? choices : lattePatterns;
+  const finalPattern = pool[Math.floor(Math.random() * pool.length)];
+
+  // เปลี่ยนภาพเร็วในช่วงแรก แล้วค่อย ๆ ช้าลงก่อนหยุด
+  const startedAt = Date.now();
+  const duration = 1900;
+  let frame = 0;
+
+  function spinFrame() {
+    const elapsed = Date.now() - startedAt;
+    const progress = Math.min(elapsed / duration, 1);
+
+    if (progress >= 1) {
+      m.pattern = finalPattern.path;
+      m.patternName = finalPattern.name;
+      m.spinning = false;
+      saveState();
+
+      // ถ้าการ์ดยังอยู่บนหน้าจอ ให้แสดงภาพและชื่อที่สุ่มได้ทันที
+      if (badge.isConnected) {
+        badge.innerHTML = `<img src="${m.pattern}" alt="${m.patternName}">`;
+        badge.disabled = false;
+        badge.setAttribute("aria-label", "สุ่มลายลาเต้อาร์ตใหม่");
+        badge.title = "คลิกเพื่อสุ่มลายใหม่";
+        const nameLabel = badge.parentElement.querySelector(".pattern-name");
+        if (nameLabel) nameLabel.textContent = m.patternName;
+      } else {
+        // หากมีการวาดกระดานใหม่ระหว่างสุ่ม ให้แสดงลายที่ได้บนกระดานใหม่
+        render();
+      }
+      return;
+    }
+
+    // ระยะห่างระหว่างภาพจะเพิ่มขึ้นเรื่อย ๆ ทำให้ดูเหมือนวงล้อกำลังหยุด
+    const delay = 45 + Math.pow(progress, 2.4) * 260;
+    let preview = lattePatterns[Math.floor(Math.random() * lattePatterns.length)];
+    if (frame % 3 === 0) preview = lattePatterns[(frame + Math.floor(Math.random() * lattePatterns.length)) % lattePatterns.length];
+    badge.innerHTML = `<img src="${preview.path}" alt="กำลังสุ่มลายลาเต้อาร์ต">`;
+    const nameLabel = badge.parentElement.querySelector(".pattern-name");
+    if (nameLabel) nameLabel.textContent = "กำลังสุ่ม...";
+    frame++;
+    setTimeout(spinFrame, delay);
+  }
+
+  spinFrame();
+}
+
+// สลับระหว่างสายแข่งขันกับตารางอันดับ
+const bracketViewport = document.getElementById("bracketViewport");
+const rankingView = document.getElementById("rankingView");
+document.getElementById("showBracket").addEventListener("click", () => {
+  bracketViewport.hidden = false; rankingView.hidden = true;
+  document.getElementById("showBracket").classList.add("active");
+  document.getElementById("showRanking").classList.remove("active");
+});
+document.getElementById("showRanking").addEventListener("click", () => {
+  bracketViewport.hidden = true; rankingView.hidden = false;
+  document.getElementById("showRanking").classList.add("active");
+  document.getElementById("showBracket").classList.remove("active");
+  renderRanking();
+});
+function renderRanking() {
+  // จัดอันดับ 32 ทีมตามสถานะล่าสุด: ทีมที่ยังชนะอยู่ด้านบน
+  // ทีมที่แพ้จะลงไปอยู่ท้ายตาราง โดยผู้แพ้รอบหลังอยู่เหนือผู้แพ้รอบก่อน และไม่ซ้ำหมายเลขอันดับ
+  const rowsByTeam = new Map();
+  teamNames.forEach((team, index) => {
+    rowsByTeam.set(team, { team, score: 0, status: "ยังไม่แข่ง", seed: index, eliminatedRound: null });
+  });
+
+  // การแพ้ในรอบที่ลึกกว่าจะเป็นสถานะสุดท้ายของทีมนั้น
+  Object.values(matches).forEach(m => {
+    if (!m.teams || !m.teams[0] || !m.teams[1] || m.winner === null || m.winner === undefined) return;
+    const winner = m.teams[m.winner];
+    const loser = m.teams[1 - m.winner];
+    const round = m.id === "FINAL" ? 5 : Number(m.round) || 1;
+    const winnerRow = rowsByTeam.get(winner);
+    if (winnerRow && winnerRow.eliminatedRound === null) {
+      winnerRow.score = Math.max(winnerRow.score, 5000 + round * 100);
+      winnerRow.status = round === 5 ? "แชมป์" : "ชนะ · ผ่านเข้ารอบ";
+    }
+    const loserRow = rowsByTeam.get(loser);
+    if (loserRow) {
+      loserRow.eliminatedRound = round;
+      loserRow.score = round === 5 ? 9000 : round * 1000;
+      loserRow.status = round === 5 ? "รองแชมป์" : `แพ้รอบ ${round}`;
+    }
+  });
+
+  const final = matches.FINAL;
+  if (final && final.winner !== null && final.winner !== undefined && final.teams[0] && final.teams[1]) {
+    const champion = rowsByTeam.get(final.teams[final.winner]);
+    const runnerUp = rowsByTeam.get(final.teams[1 - final.winner]);
+    if (champion) { champion.score = 10000; champion.status = "แชมป์"; }
+    if (runnerUp) { runnerUp.score = 9000; runnerUp.status = "รองแชมป์"; }
+  }
+
+  // ผู้แพ้รอบรองชนะเลิศทั้งสองทีมเป็นรองชนะเลิศอันดับ 2 ร่วมกัน (อันดับ 3)
+  // เมื่อทราบผลรอบรองแล้ว จึงกำหนดทั้งสองทีมให้มีสถานะเดียวกัน
+  for (const semifinal of Object.values(matches).filter(m => Number(m.round) === 4)) {
+    if (!semifinal.teams?.[0] || !semifinal.teams?.[1] || semifinal.winner === null || semifinal.winner === undefined) continue;
+    const semifinalLoser = rowsByTeam.get(semifinal.teams[1 - semifinal.winner]);
+    if (semifinalLoser) {
+      semifinalLoser.score = 4000;
+      semifinalLoser.status = "รองชนะเลิศอันดับ 2";
+      semifinalLoser.sharedThird = true;
+    }
+  }
+
+  const rows = [...rowsByTeam.values()].sort((a, b) => {
+    // คะแนนสูงกว่าจะอยู่บน; ทีมที่ตกรอบลึกกว่าจะอยู่เหนือทีมที่ตกรอบก่อน
+    // ถ้าตกรอบเดียวกัน ใช้ลำดับทีมในสายเป็นตัวตัดสิน เพื่อให้มีอันดับ 1–32 ไม่ซ้ำ
+    return b.score - a.score || a.seed - b.seed;
+  });
+  const table = document.getElementById("rankingTable");
+  table.innerHTML = "";
+  let displayRank = 1;
+  rows.forEach((row, index) => {
+    const div = document.createElement("div");
+    div.className = "rank-row";
+    const rank = document.createElement("div");
+    rank.className = "rank-number";
+    rank.textContent = row.sharedThird ? "อันดับ 3" : `อันดับ ${displayRank}`;
+    // สองทีมรองชนะเลิศอันดับ 2 ใช้อันดับ 3 ร่วมกัน จึงข้ามอันดับ 4
+    displayRank += row.sharedThird ? 0 : 1;
+    if (index + 1 < rows.length && row.sharedThird && !rows[index + 1].sharedThird) displayRank = Math.max(displayRank, 5);
+    const team = document.createElement("div");
+    team.className = "rank-team";
+    team.textContent = row.team;
+    const status = document.createElement("div");
+    status.className = "rank-status";
+    status.textContent = row.status;
+    div.append(rank, team, status);
+    table.appendChild(div);
+  });
+}
+
+// สร้างกล่องแข่งขัน
+function render() {
+  board.querySelectorAll(".match").forEach(el => el.remove());
+
+  Object.values(matches).forEach(m => {
+    const card = document.createElement("div");
+    card.className = "match";
+    if (m.id === "FINAL") card.classList.add("final-match");
+
+    card.style.left = `${m.x}px`;
+    card.style.top = `${m.y}px`;
+
+    const label = document.createElement("div");
+    label.className = "round-title";
+    label.textContent =
+      m.round === 1 ? "Round 1" :
+      m.round === 2 ? "Round 2" :
+      m.round === 3 ? "Round 3" :
+      m.round === 4 ? "Round 4" : "Final Round";
+
+    const list = document.createElement("div");
+    list.className = "teams";
+
+    m.teams.forEach((name, slot) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "team";
+      btn.textContent = name || "";
+      btn.disabled = !name;
+      if (m.revealSlot === slot) {
+      btn.classList.add("reveal");
+      delete m.revealSlot;
+} 
+
+      if (m.winner === slot) {
+        btn.classList.add("winner");
+      }
+
+      btn.disabled = !name || !isControl;
+      btn.addEventListener("click", () => {
+        chooseWinner(m.id, slot);
       });
-      const photoPoint = pointOnWheel(32);
-      const labelPoint = pointOnWheel(20.5);
 
-      const photoWrap = document.createElement("div");
-      photoWrap.className = "photo-wrap";
-      photoWrap.style.left = `${photoPoint.left}%`;
-      photoWrap.style.top = `${photoPoint.top}%`;
-      const image = document.createElement("img");
-      image.src = choice.photo;
-      image.alt = `${choice.name} latte art`;
-      photoWrap.appendChild(image);
-      wheel.appendChild(photoWrap);
-
-      const label = document.createElement("div");
-      label.className = "label";
-      label.style.left = `${labelPoint.left}%`;
-      label.style.top = `${labelPoint.top}%`;
-      label.textContent = choice.name;
-      wheel.appendChild(label);
+      list.appendChild(btn);
     });
 
-    const hub = document.createElement("div");
-    hub.className = "hub";
-    hub.setAttribute("aria-hidden", "true");
-    wheel.appendChild(hub);
-
-    function showResult(choice) {
-      winnerName.textContent = choice.name;
-      winnerPhoto.src = choice.photo;
-      winnerPhoto.alt = `${choice.name} latte art`;
-      modal.classList.add("visible");
-      modal.setAttribute("aria-hidden", "false");
-      okButton.focus();
+    const badge = document.createElement("button");
+    badge.type = "button";
+    badge.className = "coffee";
+    if (m.patternChanged) {
+      badge.classList.add("pattern-reveal");
+      delete m.patternChanged;
     }
+    badge.disabled = !!m.spinning || !isControl;
+    badge.setAttribute("aria-label", m.spinning ? "กำลังสุ่มลายลาเต้อาร์ต" : (m.pattern ? "สุ่มลายลาเต้อาร์ตใหม่" : "สุ่มลายลาเต้อาร์ต"));
+    badge.title = m.spinning ? "กำลังสุ่ม..." : (m.pattern ? "คลิกเพื่อสุ่มลายใหม่" : "คลิกเพื่อสุ่มลายลาเต้อาร์ต");
+    badge.innerHTML = m.pattern
+      ? `<img src="${m.pattern}" alt="${m.patternName || "Latte Art"}">`
+      : "<span>?</span>";
+    badge.addEventListener("click", () => randomizePattern(m.id, badge));
 
-    function hideResult() {
-      modal.classList.remove("visible");
-      modal.setAttribute("aria-hidden", "true");
-      startContinuousSpin();
-      spinButton.focus();
+    const patternName = document.createElement("div");
+    patternName.className = "pattern-name";
+    patternName.textContent = m.spinning ? "กำลังสุ่ม..." : (m.patternName || "");
+
+    card.append(label, list, badge, patternName);
+    board.appendChild(card);
+  });
+
+  drawWires();
+  if (!rankingView.hidden) renderRanking();
+
+}
+
+// วาดเส้นเชื่อมจาก 2 คู่เข้าหาคู่ถัดไป
+function drawWires() {
+  const svg = document.getElementById("wires");
+  svg.innerHTML = "";
+  function path(d) {
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", d); svg.appendChild(p);
+  }
+  function connect(a, b, target) {
+    const rightward = a.side === "L";
+    const startX1 = rightward ? a.x + 170 : a.x;
+    const startX2 = rightward ? b.x + 170 : b.x;
+    const endX = rightward ? target.x : target.x + (target.id === "FINAL" ? 190 : 170);
+    const elbowX = (startX1 + endX) / 2;
+    const ay = a.y + 32, by = b.y + 32, ty = target.y + 32;
+    path(`M ${startX1} ${ay} H ${elbowX} V ${ty}`);
+    path(`M ${startX2} ${by} H ${elbowX} V ${ty}`);
+    path(`M ${elbowX} ${ty} H ${endX}`);
+  }
+  for (const side of ["L", "R"]) {
+    for (let round = 1; round <= 3; round++) {
+      const count = [8, 4, 2][round - 1];
+      for (let i = 0; i < count; i += 2) {
+        connect(matches[`${side}${round}-${i}`], matches[`${side}${round}-${i+1}`], matches[`${side}${round+1}-${i/2}`]);
+      }
     }
+    connect(matches[`${side}4-0`], matches[`${side}4-0`], matches.FINAL);
+  }
+} 
 
-    function startContinuousSpin() {
-      spinning = true;
-      spinButton.textContent = "สุ่มลาย";
-      wheel.style.transition = "transform 12s linear";
+function resetTournament() {
+  if (!isControl) return;
+  if (!confirm("ต้องการรีเซ็ตทั้งระบบกลับเป็นค่าเริ่มต้นหรือไม่?\n\nชื่อทีม ผลการแข่งขัน ลายลาเต้ และข้อมูลทุกยกจะถูกล้างทั้งหมด และจอโชว์จะรีเซ็ตตามด้วย")) return;
 
-      const turn = () => {
-        rotation += 360;
-        wheel.style.transform = `rotate(${rotation}deg)`;
-      };
+  // คืนชื่อทีม A–AF เป็นค่าเริ่มต้น (32 ทีม)
+  const defaultNames = Array.from({ length: 32 }, (_, i) => teamLabel(i));
+  defaultNames.forEach((name, i) => { teamNames[i] = name; });
 
-      turn();
-      continuousSpinTimer = window.setInterval(turn, 11500);
-    }
+  // ล้างผู้ชนะ ลายที่เลือก เอฟเฟกต์ และข้อมูลทุกแมตช์
+  Object.values(matches).forEach(m => {
+    m.winner = null;
+    m.pattern = null;
+    m.patternName = "";
+    m.revealSlot = null;
+    m.teams = m.round === 1
+      ? [teamNames[(m.side === "R" ? 16 : 0) + m.index * 2], teamNames[(m.side === "R" ? 16 : 0) + m.index * 2 + 1]]
+      : ["", ""];
+  });
 
-    function stopAndPickWinner() {
-      window.clearInterval(continuousSpinTimer);
-      continuousSpinTimer = null;
-      spinButton.disabled = true;
-      spinButton.textContent = "กำลังสุ่ม...";
+  // บันทึกค่าเริ่มต้นเพื่อให้หน้าจอโชว์อีกจอรับการรีเซ็ตผ่าน storage event
+  saveState();
+  renderTeamEditor();
+  render();
+}
 
-      const winnerIndex = Math.floor(Math.random() * choices.length);
-      // One uninterrupted motion: fast at the start, then easing to the result.
-      const targetAtPointer = (360 - winnerIndex * sector) % 360;
-      const currentAngle = ((rotation % 360) + 360) % 360;
-      const adjustment = (targetAtPointer - currentAngle + 360) % 360;
-      rotation += 6 * 360 + adjustment;
-      wheel.style.transition = "transform 5.2s cubic-bezier(.08, .76, .14, 1)";
-      wheel.style.transform = `rotate(${rotation}deg)`;
+function renderTeamEditor() {
+  const grid = document.getElementById("teamEditGrid");
+  if (!grid || !isControl) return;
+  grid.innerHTML = "";
+  teamNames.forEach((name, index) => {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 50;
+    input.value = name;
+    input.dataset.index = String(index);
+    input.setAttribute("aria-label", `ชื่อทีม ${index + 1}`);
+    input.placeholder = `ชื่อทีม ${index + 1}`;
+    grid.appendChild(input);
+  });
+}
 
-      const finishSpin = () => {
-        wheel.removeEventListener("transitionend", finishSpin);
-        spinning = false;
-        spinButton.disabled = false;
-        showResult(choices[winnerIndex]);
-      };
-      wheel.addEventListener("transitionend", finishSpin);
-    }
+document.getElementById("saveNames").addEventListener("click", () => {
+  if (!isControl) return;
+  const inputs = [...document.querySelectorAll("#teamEditGrid input")];
+  inputs.forEach((input, index) => { teamNames[index] = input.value.trim() || `Team ${index + 1}`; });
+  // เปลี่ยนชื่อทีมแล้วเริ่มสายแข่งใหม่ เพื่อไม่ให้ผลเดิมผูกกับชื่อเก่า
+  Object.values(matches).forEach(m => {
+    m.winner = null;
+    m.pattern = null;
+    m.patternName = "";
+    if (m.round === 1) {
+      const base = m.side === "R" ? 16 : 0;
+      m.teams = [teamNames[base + m.index * 2], teamNames[base + m.index * 2 + 1]];
+    } else m.teams = ["", ""];
+  });
+  render(); saveState();
+  alert("บันทึกชื่อทีมแล้ว และล้างผลการแข่งขันเดิมแล้ว");
+});
+document.getElementById("resetButton").addEventListener("click", resetTournament);
 
-    spinButton.addEventListener("click", () => {
-      if (spinning) stopAndPickWinner();
-      else startContinuousSpin();
-    });
-    okButton.addEventListener("click", hideResult);
-    modal.addEventListener("click", (event) => {
-      if (event.target === modal) hideResult();
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && modal.classList.contains("visible")) hideResult();
-    });
-
-    startContinuousSpin();
-  </script>
+loadState();
+render();
+loadDisplayConfig();
+if (isControl) renderTeamEditor();
+</script>
 </body>
 </html>
