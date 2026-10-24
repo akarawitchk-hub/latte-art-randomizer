@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -659,7 +658,7 @@ function renderRanking() {
     div.className = "rank-row";
     const rank = document.createElement("div");
     rank.className = "rank-number";
-    rank.textContent = row.sharedThird ? "3rd Place" : `Rank ${displayRank}`;
+    rank.textContent = `Rank ${row.sharedThird ? 3 : displayRank}`;
     // The two third-place teams share rank 3, so skip rank 4.
     displayRank += row.sharedThird ? 0 : 1;
     if (index + 1 < rows.length && row.sharedThird && !rows[index + 1].sharedThird) displayRank = Math.max(displayRank, 5);
