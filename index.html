@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Coffee Tournament</title>
+<title>Coffee Draw</title>
 <style>
 *{box-sizing:border-box}
 body{
@@ -54,7 +54,7 @@ header p{color:#bd9163;font-size:12px;letter-spacing:3px}
 .team:first-child{border-radius:10px 10px 0 0}
 .team:last-child{border-radius:0 0 10px 10px}
 .team+ .team{border-top:1px solid #70665d}
-/* ไม่เปลี่ยนสีช่องทีมเมื่อเลื่อนเมาส์ไปชี้ */
+/* Keep team slots unchanged on hover. */
 .team:hover:not(:disabled):not(.winner) {
   background: #514c48;
   color: white;
@@ -64,7 +64,7 @@ header p{color:#bd9163;font-size:12px;letter-spacing:3px}
   color: #4c301b;
 }
 
-/* ไม่ให้แถบดำแสดงตอนชี้ช่องปกติ */
+/* Hide the reveal bar on regular team slots. */
 .team:not(.reveal)::after {
   display: none;
 }
@@ -214,7 +214,7 @@ header p{color:#bd9163;font-size:12px;letter-spacing:3px}
   100% { color: white; }
 }
 
-/* เอฟเฟกต์ลาย Latte Art ที่หน้าจอโชว์ */
+/* Latte art reveal effect on the display screen. */
 .coffee.pattern-reveal img {
   animation: patternReveal 1.05s cubic-bezier(.2,.8,.2,1) both;
 }
@@ -255,51 +255,51 @@ body.show-mode .coffee{pointer-events:none;cursor:default}
 <body>
 
 <header>
-  <h1> COFFEE TOURNAMENT</h1>
-  <p>LATTE ART </p>
+  <h1> COFFEE DRAW</h1>
+  <p>LATTE ART PATTERN</p>
 </header>
 
 <nav class="mode-bar" id="modeBar">
-  <button id="openShowWindow" class="active" type="button">เปิดหน้าต่างโชว์</button>
-  <button id="copyShow" type="button">คัดลอกลิงก์จอโชว์</button>
+  <button id="openShowWindow" class="active" type="button">Open Display Window</button>
+  <button id="copyShow" type="button">Copy Display Link</button>
 </nav>
 <div class="mode-status" id="modeStatus"></div>
 <section class="control-panel" id="controlPanel" hidden>
-  <h2>แผงควบคุมการแข่งขัน</h2>
+  <h2>TEAM Control</h2>
   <p style="text-align:center;font-size:13px;color:#d8b58b"></p>
   <div class="team-edit-grid" id="teamEditGrid"></div>
   <div class="display-admin" id="displayAdmin">
-    <h3>ตั้งค่าหน้าจอโชว์</h3>
-    <label>หน้าที่ให้แสดง
+    <h3>Display Settings</h3>
+    <label>Page to display
       <select id="displayPage">
-        <option value="auto">สลับอัตโนมัติ</option>
-        <option value="bracket">สายการแข่งขันเท่านั้น</option>
-        <option value="ranking">ตารางอันดับเท่านั้น</option>
+        <option value="auto">Rotate automatically</option>
+        <option value="bracket">Bracket only</option>
+        <option value="ranking">Rankings only</option>
       </select>
     </label>
-    <label>สลับหน้าทุก
+    <label>Switch pages every
       <select id="displayInterval">
-        <option value="10">10 วินาที</option><option value="15" selected>15 วินาที</option>
-        <option value="30">30 วินาที</option><option value="60">60 วินาที</option>
+        <option value="10">10 seconds</option><option value="15" selected>15 seconds</option>
+        <option value="30">30 seconds</option><option value="60">60 seconds</option>
       </select>
     </label>
-    <label class="display-lock"><input type="checkbox" id="displayLock"> ล็อกหน้าจอโชว์ (หยุดสลับอัตโนมัติ)</label>
-    <button type="button" class="primary" id="saveDisplaySettings">บันทึกการตั้งค่าจอโชว์</button>
-    <p class="display-help">เลือกหน้าใดหน้าหนึ่งเพื่อบังคับจอโชว์ หรือเลือกสลับอัตโนมัติ หากล็อกไว้ระบบจะค้างหน้าที่กำหนด</p>
+    <label class="display-lock"><input type="checkbox" id="displayLock"> Lock display (stop automatic rotation)</label>
+    <button type="button" class="primary" id="saveDisplaySettings">Save Display Settings</button>
+    <p class="display-help">Choose a page to keep on the display, or enable automatic rotation. When locked, the display stays on the selected page.</p>
   </div>
   <div class="panel-actions">
-    <button class="primary" id="saveNames" type="button">บันทึกชื่อทีม</button>
-    <button id="resetButton" type="button">รีเซ็ตการแข่งขัน</button>
+    <button class="primary" id="saveNames" type="button">Save Team Names</button>
+    <button id="resetButton" type="button">Reset</button>
   </div>
 </section>
 
 <nav class="mode-bar" id="viewBar">
-  <button type="button" id="showBracket" class="active">สายการแข่งขัน</button>
-  <button type="button" id="showRanking">ตารางอันดับ</button>
+  <button type="button" id="showBracket" class="active">Bracket</button>
+  <button type="button" id="showRanking">Rankings</button>
 </nav>
 <section id="rankingView" class="ranking-view" hidden>
-  <h2>ตารางอันดับ 32 ทีม</h2>
-  <p>แสดงอันดับ 1–32 ผู้ชนะจะขยับขึ้นด้านบน ส่วนทีมที่แพ้จะเลื่อนลงด้านล่าง</p>
+  <h2>32-Team Rankings</h2>
+  <p>Ranks teams from 1 to 32. Winners move up the table, while eliminated teams move down.</p>
   <div id="rankingTable"></div>
 </section>
 <div class="viewport" id="bracketViewport">
@@ -318,12 +318,12 @@ const teamNames = Array.from({ length: 32 }, (_, i) => teamLabel(i));
 
 const matches = {};
 const board = document.getElementById("board");
-const STORAGE_KEY = "coffee-tournament-state-v2";
-const DISPLAY_KEY = "coffee-tournament-display-v1";
+const STORAGE_KEY = "coffee-Draw-state-v2";
+const DISPLAY_KEY = "coffee-Draw-display-v1";
 let displayConfig = { page: "auto", interval: 15, locked: false };
 let displayTimer = null;
 const params = new URLSearchParams(location.search);
-// เปิดไฟล์แบบไม่มีพารามิเตอร์ให้เข้าหน้าควบคุมเป็นค่าเริ่มต้น
+// Open the control panel by default when no mode is specified.
 const mode = params.get("mode") === "show" ? "show" : "control";
 const isControl = mode === "control";
 document.body.classList.toggle("show-mode", !isControl);
@@ -339,18 +339,18 @@ document.getElementById("modeStatus").textContent = isControl
 document.getElementById("openShowWindow").addEventListener("click", () => {
   const url = new URL(location.href);
   url.searchParams.set("mode", "show");
-  // ขอเปิดเป็นหน้าต่างใหม่ เบราว์เซอร์อาจเปิดเป็นแท็บตามการตั้งค่า
-  const popup = window.open(url.href, "CoffeeTournamentShow", "popup=yes,width=1500,height=900,resizable=yes,scrollbars=yes");
+  // Request a new window; the browser may open a tab depending on its settings.
+  const popup = window.open(url.href, "CoffeeDrawShow", "popup=yes,width=1500,height=900,resizable=yes,scrollbars=yes");
   if (!popup) {
-    alert("เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups สำหรับหน้านี้ แล้วกดอีกครั้ง");
+    alert("The browser blocked the new window. Allow pop-ups for this page, then try again.");
   }
 });
 
 document.getElementById("copyShow").addEventListener("click", async () => {
   const url = new URL(location.href);
   url.searchParams.set("mode", "show");
-  try { await navigator.clipboard.writeText(url.href); alert("คัดลอกลิงก์จอโชว์แล้ว"); }
-  catch { prompt("คัดลอกลิงก์จอโชว์นี้", url.href); }
+  try { await navigator.clipboard.writeText(url.href); alert("Display link copied."); }
+  catch { prompt("Copy this display link:", url.href); }
 });
 
 function saveState() {
@@ -381,7 +381,7 @@ function loadState() {
         matches[id].revealSlot = Number.isInteger(saved.revealSlot) ? saved.revealSlot : null;
       }
     }
-  } catch (error) { console.warn("อ่านข้อมูลการแข่งขันไม่สำเร็จ", error); }
+  } catch (error) { console.warn("Failed to load draw data.", error); }
 }
 
 function setVisiblePage(page) {
@@ -395,16 +395,16 @@ function setVisiblePage(page) {
 function applyDisplayConfig() {
   if (displayTimer) { clearInterval(displayTimer); displayTimer = null; }
   if (isControl) {
-    // แอดมินเป็นหน้าควบคุมตลอด ไม่สลับตามเวลา
+    // Keep the control panel fixed; do not rotate pages.
     document.getElementById("displayPage").value = displayConfig.page;
     document.getElementById("displayInterval").value = String(displayConfig.interval);
     document.getElementById("displayLock").checked = !!displayConfig.locked;
     return;
   }
-  // การเลือกหน้า/สลับเวลา มีผลเฉพาะหน้าจอโชว์เท่านั้น
+  // Page selection and rotation settings apply only to the display screen.
   if (displayConfig.page === "bracket") setVisiblePage("bracket");
   else if (displayConfig.page === "ranking") setVisiblePage("ranking");
-  else if (displayConfig.locked) { /* ล็อกไว้: คงหน้าปัจจุบันบนจอโชว์ */ }
+  else if (displayConfig.locked) { /* Keep the current page on the display. */ }
   else {
     displayTimer = setInterval(() => {
       if (document.hidden) return;
@@ -420,7 +420,7 @@ document.getElementById("saveDisplaySettings").addEventListener("click", () => {
   displayConfig = { page: document.getElementById("displayPage").value, interval: Number(document.getElementById("displayInterval").value), locked: document.getElementById("displayLock").checked };
   localStorage.setItem(DISPLAY_KEY, JSON.stringify(displayConfig));
   applyDisplayConfig();
-  alert("บันทึกการตั้งค่าจอโชว์แล้ว");
+  alert("Display settings saved.");
 });
 
 window.addEventListener("storage", (event) => {
@@ -450,8 +450,8 @@ function addMatch(id, round, index, teams, x, y, side) {
   };
 }
 
-// สายการแข่งขัน 32 ทีม: ซ้าย 16 ทีม ขวา 16 ทีม
-// แต่ละรอบจัดตำแหน่งให้คู่ที่ป้อนเข้าหากันอยู่กึ่งกลางเดียวกัน
+// 32-team bracket: 16 teams on each side.
+// Center each advancing matchup between its feeder matches.
 const roundXs = { L: [10, 220, 430, 640], R: [1690, 1480, 1270, 1060] };
 const roundCounts = [8, 4, 2, 1];
 for (const side of ["L", "R"]) {
@@ -470,7 +470,7 @@ for (const side of ["L", "R"]) {
 }
 addMatch("FINAL", 5, 0, ["", ""], 850, 527, "C");
 
-// ระบุปลายทางของผู้ชนะอย่างชัดเจน
+// Explicitly determine where the winner advances.
 function nextMatch(id) {
   const m = matches[id];
   if (m.round >= 5) return null;
@@ -478,7 +478,7 @@ function nextMatch(id) {
   return { id: `${m.side}${m.round + 1}-${Math.floor(m.index / 2)}`, slot: m.index % 2 };
 }
 
-// ล้างผลของรอบต่อ ๆ ไป เมื่อเปลี่ยนผู้ชนะ
+// Clear downstream results when a winner changes.
 function clearDownstream(id) {
   const next = nextMatch(id);
   if (!next) return;
@@ -490,18 +490,18 @@ function clearDownstream(id) {
   clearDownstream(next.id);
 }
 
-// เลือกทีมที่ชนะ
+// Select the winning team.
 function chooseWinner(id, slot) {
   if (!isControl) return;
   const m = matches[id];
   if (!m.teams[slot]) return;
 
-  // ล้างผลเดิมที่ได้รับผลกระทบ
+  // Clear affected downstream results.
   clearDownstream(id);
 
   m.winner = slot;
 
-  // ส่งทีมชนะไปยังช่องของรอบถัดไป
+  // Advance the winner to the next round.
   const next = nextMatch(id);
 
   if (next) {
@@ -513,7 +513,7 @@ function chooseWinner(id, slot) {
   render();
 }
 
-// รายการภาพลายลาเต้อาร์ต (ต้องมีโฟลเดอร์ assets/tight อยู่ข้างไฟล์ HTML)
+// Latte art images (the assets/tight folder must be next to this HTML file).
 const lattePatterns = [
   { path: "assets/tight/rosetta.png", name: "Rosetta" },
   { path: "assets/tight/framed-tulip.png", name: "Framed Tulip" },
@@ -529,19 +529,19 @@ const lattePatterns = [
 function randomizePattern(id, badge) {
   if (!isControl) return;
   const m = matches[id];
-  if (!m || m.spinning) return; // ป้องกันการกดซ้ำระหว่างกำลังสุ่ม
+  if (!m || m.spinning) return; // Prevent repeated clicks while spinning.
 
   m.spinning = true;
   badge.disabled = true;
-  badge.setAttribute("aria-label", "กำลังสุ่มลายลาเต้อาร์ต");
-  badge.title = "กำลังสุ่ม...";
+  badge.setAttribute("aria-label", "Randomizing latte art");
+  badge.title = "Randomizing...";
 
-  // เลือกลายปลายทาง โดยพยายามไม่ให้ซ้ำกับลายก่อนหน้า
+  // Prefer a different pattern from the previous one.
   const choices = lattePatterns.filter(item => item.path !== m.pattern);
   const pool = choices.length ? choices : lattePatterns;
   const finalPattern = pool[Math.floor(Math.random() * pool.length)];
 
-  // เปลี่ยนภาพเร็วในช่วงแรก แล้วค่อย ๆ ช้าลงก่อนหยุด
+  // Cycle quickly at first, then slow down before stopping.
   const startedAt = Date.now();
   const duration = 1900;
   let frame = 0;
@@ -556,28 +556,28 @@ function randomizePattern(id, badge) {
       m.spinning = false;
       saveState();
 
-      // ถ้าการ์ดยังอยู่บนหน้าจอ ให้แสดงภาพและชื่อที่สุ่มได้ทันที
+      // Update the selected pattern immediately if the card is still on screen.
       if (badge.isConnected) {
         badge.innerHTML = `<img src="${m.pattern}" alt="${m.patternName}">`;
         badge.disabled = false;
-        badge.setAttribute("aria-label", "สุ่มลายลาเต้อาร์ตใหม่");
-        badge.title = "คลิกเพื่อสุ่มลายใหม่";
+        badge.setAttribute("aria-label", "Randomize latte art again");
+        badge.title = "Click to randomize again";
         const nameLabel = badge.parentElement.querySelector(".pattern-name");
         if (nameLabel) nameLabel.textContent = m.patternName;
       } else {
-        // หากมีการวาดกระดานใหม่ระหว่างสุ่ม ให้แสดงลายที่ได้บนกระดานใหม่
+        // If the bracket was redrawn while spinning, render the selected pattern.
         render();
       }
       return;
     }
 
-    // ระยะห่างระหว่างภาพจะเพิ่มขึ้นเรื่อย ๆ ทำให้ดูเหมือนวงล้อกำลังหยุด
+    // Gradually increase the interval to make the wheel appear to slow down.
     const delay = 45 + Math.pow(progress, 2.4) * 260;
     let preview = lattePatterns[Math.floor(Math.random() * lattePatterns.length)];
     if (frame % 3 === 0) preview = lattePatterns[(frame + Math.floor(Math.random() * lattePatterns.length)) % lattePatterns.length];
-    badge.innerHTML = `<img src="${preview.path}" alt="กำลังสุ่มลายลาเต้อาร์ต">`;
+    badge.innerHTML = `<img src="${preview.path}" alt="Randomizing latte art">`;
     const nameLabel = badge.parentElement.querySelector(".pattern-name");
-    if (nameLabel) nameLabel.textContent = "กำลังสุ่ม...";
+    if (nameLabel) nameLabel.textContent = "Randomizing...";
     frame++;
     setTimeout(spinFrame, delay);
   }
@@ -585,7 +585,7 @@ function randomizePattern(id, badge) {
   spinFrame();
 }
 
-// สลับระหว่างสายแข่งขันกับตารางอันดับ
+// Switch between the bracket and rankings.
 const bracketViewport = document.getElementById("bracketViewport");
 const rankingView = document.getElementById("rankingView");
 document.getElementById("showBracket").addEventListener("click", () => {
@@ -600,14 +600,14 @@ document.getElementById("showRanking").addEventListener("click", () => {
   renderRanking();
 });
 function renderRanking() {
-  // จัดอันดับ 32 ทีมตามสถานะล่าสุด: ทีมที่ยังชนะอยู่ด้านบน
-  // ทีมที่แพ้จะลงไปอยู่ท้ายตาราง โดยผู้แพ้รอบหลังอยู่เหนือผู้แพ้รอบก่อน และไม่ซ้ำหมายเลขอันดับ
+  // Rank all 32 teams by their current status, with active winners at the top.
+  // Teams eliminated in later rounds rank above earlier eliminations; ranks remain unique.
   const rowsByTeam = new Map();
   teamNames.forEach((team, index) => {
-    rowsByTeam.set(team, { team, score: 0, status: "ยังไม่แข่ง", seed: index, eliminatedRound: null });
+    rowsByTeam.set(team, { team, score: 0, status: "n/a", seed: index, eliminatedRound: null });
   });
 
-  // การแพ้ในรอบที่ลึกกว่าจะเป็นสถานะสุดท้ายของทีมนั้น
+  // A later-round loss determines the team's final status.
   Object.values(matches).forEach(m => {
     if (!m.teams || !m.teams[0] || !m.teams[1] || m.winner === null || m.winner === undefined) return;
     const winner = m.teams[m.winner];
@@ -616,13 +616,13 @@ function renderRanking() {
     const winnerRow = rowsByTeam.get(winner);
     if (winnerRow && winnerRow.eliminatedRound === null) {
       winnerRow.score = Math.max(winnerRow.score, 5000 + round * 100);
-      winnerRow.status = round === 5 ? "แชมป์" : "ชนะ · ผ่านเข้ารอบ";
+      winnerRow.status = round === 5 ? "Champion" : "Winner · advanced";
     }
     const loserRow = rowsByTeam.get(loser);
     if (loserRow) {
       loserRow.eliminatedRound = round;
       loserRow.score = round === 5 ? 9000 : round * 1000;
-      loserRow.status = round === 5 ? "รองแชมป์" : `แพ้รอบ ${round}`;
+      loserRow.status = round === 5 ? "Runner-up" : `Lost in Round ${round}`;
     }
   });
 
@@ -630,25 +630,25 @@ function renderRanking() {
   if (final && final.winner !== null && final.winner !== undefined && final.teams[0] && final.teams[1]) {
     const champion = rowsByTeam.get(final.teams[final.winner]);
     const runnerUp = rowsByTeam.get(final.teams[1 - final.winner]);
-    if (champion) { champion.score = 10000; champion.status = "แชมป์"; }
-    if (runnerUp) { runnerUp.score = 9000; runnerUp.status = "รองแชมป์"; }
+    if (champion) { champion.score = 10000; champion.status = "Champion"; }
+    if (runnerUp) { runnerUp.score = 9000; runnerUp.status = "Runner-up"; }
   }
 
-  // ผู้แพ้รอบรองชนะเลิศทั้งสองทีมเป็นรองชนะเลิศอันดับ 2 ร่วมกัน (อันดับ 3)
-  // เมื่อทราบผลรอบรองแล้ว จึงกำหนดทั้งสองทีมให้มีสถานะเดียวกัน
+  // Both semifinal losers share third place.
+  // Assign the shared status once the semifinal results are known.
   for (const semifinal of Object.values(matches).filter(m => Number(m.round) === 4)) {
     if (!semifinal.teams?.[0] || !semifinal.teams?.[1] || semifinal.winner === null || semifinal.winner === undefined) continue;
     const semifinalLoser = rowsByTeam.get(semifinal.teams[1 - semifinal.winner]);
     if (semifinalLoser) {
       semifinalLoser.score = 4000;
-      semifinalLoser.status = "รองชนะเลิศอันดับ 2";
+      semifinalLoser.status = "Third place";
       semifinalLoser.sharedThird = true;
     }
   }
 
   const rows = [...rowsByTeam.values()].sort((a, b) => {
-    // คะแนนสูงกว่าจะอยู่บน; ทีมที่ตกรอบลึกกว่าจะอยู่เหนือทีมที่ตกรอบก่อน
-    // ถ้าตกรอบเดียวกัน ใช้ลำดับทีมในสายเป็นตัวตัดสิน เพื่อให้มีอันดับ 1–32 ไม่ซ้ำ
+    // Higher scores rank first; later-round eliminations rank above earlier ones.
+    // Use bracket seed as the tiebreaker to keep ranks 1–32 unique.
     return b.score - a.score || a.seed - b.seed;
   });
   const table = document.getElementById("rankingTable");
@@ -659,8 +659,8 @@ function renderRanking() {
     div.className = "rank-row";
     const rank = document.createElement("div");
     rank.className = "rank-number";
-    rank.textContent = row.sharedThird ? "อันดับ 3" : `อันดับ ${displayRank}`;
-    // สองทีมรองชนะเลิศอันดับ 2 ใช้อันดับ 3 ร่วมกัน จึงข้ามอันดับ 4
+    rank.textContent = row.sharedThird ? "3rd Place" : `Rank ${displayRank}`;
+    // The two third-place teams share rank 3, so skip rank 4.
     displayRank += row.sharedThird ? 0 : 1;
     if (index + 1 < rows.length && row.sharedThird && !rows[index + 1].sharedThird) displayRank = Math.max(displayRank, 5);
     const team = document.createElement("div");
@@ -674,7 +674,7 @@ function renderRanking() {
   });
 }
 
-// สร้างกล่องแข่งขัน
+// Create the match cards.
 function render() {
   board.querySelectorAll(".match").forEach(el => el.remove());
 
@@ -728,16 +728,16 @@ function render() {
       delete m.patternChanged;
     }
     badge.disabled = !!m.spinning || !isControl;
-    badge.setAttribute("aria-label", m.spinning ? "กำลังสุ่มลายลาเต้อาร์ต" : (m.pattern ? "สุ่มลายลาเต้อาร์ตใหม่" : "สุ่มลายลาเต้อาร์ต"));
-    badge.title = m.spinning ? "กำลังสุ่ม..." : (m.pattern ? "คลิกเพื่อสุ่มลายใหม่" : "คลิกเพื่อสุ่มลายลาเต้อาร์ต");
+    badge.setAttribute("aria-label", m.spinning ? "Randomizing latte art" : (m.pattern ? "Randomize latte art again" : "Randomize latte art"));
+    badge.title = m.spinning ? "Randomizing..." : (m.pattern ? "Click to randomize again" : "Click to randomize latte art");
     badge.innerHTML = m.pattern
-      ? `<img src="${m.pattern}" alt="${m.patternName || "Latte Art"}">`
+      ? `<img src="${m.pattern}" alt="${m.patternName || "Latte Art Pattern"}">`
       : "<span>?</span>";
     badge.addEventListener("click", () => randomizePattern(m.id, badge));
 
     const patternName = document.createElement("div");
     patternName.className = "pattern-name";
-    patternName.textContent = m.spinning ? "กำลังสุ่ม..." : (m.patternName || "");
+    patternName.textContent = m.spinning ? "Randomizing..." : (m.patternName || "");
 
     card.append(label, list, badge, patternName);
     board.appendChild(card);
@@ -748,7 +748,7 @@ function render() {
 
 }
 
-// วาดเส้นเชื่อมจาก 2 คู่เข้าหาคู่ถัดไป
+// Draw connectors from two matches to the next match.
 function drawWires() {
   const svg = document.getElementById("wires");
   svg.innerHTML = "";
@@ -778,15 +778,15 @@ function drawWires() {
   }
 } 
 
-function resetTournament() {
+function resetDraw() {
   if (!isControl) return;
-  if (!confirm("ต้องการรีเซ็ตทั้งระบบกลับเป็นค่าเริ่มต้นหรือไม่?\n\nชื่อทีม ผลการแข่งขัน ลายลาเต้ และข้อมูลทุกยกจะถูกล้างทั้งหมด และจอโชว์จะรีเซ็ตตามด้วย")) return;
+  if (!confirm("Reset the entire draw to its default state?\n\nTeam names, match results, latte art, and all round data will be cleared. The display screen will also be reset.")) return;
 
-  // คืนชื่อทีม A–AF เป็นค่าเริ่มต้น (32 ทีม)
+  // Restore the default team names A–AF (32 teams).
   const defaultNames = Array.from({ length: 32 }, (_, i) => teamLabel(i));
   defaultNames.forEach((name, i) => { teamNames[i] = name; });
 
-  // ล้างผู้ชนะ ลายที่เลือก เอฟเฟกต์ และข้อมูลทุกแมตช์
+  // Clear winners, selected patterns, effects, and all match data.
   Object.values(matches).forEach(m => {
     m.winner = null;
     m.pattern = null;
@@ -797,7 +797,7 @@ function resetTournament() {
       : ["", ""];
   });
 
-  // บันทึกค่าเริ่มต้นเพื่อให้หน้าจอโชว์อีกจอรับการรีเซ็ตผ่าน storage event
+  // Save defaults so the display screen receives the reset through the storage event.
   saveState();
   renderTeamEditor();
   render();
@@ -813,8 +813,8 @@ function renderTeamEditor() {
     input.maxLength = 50;
     input.value = name;
     input.dataset.index = String(index);
-    input.setAttribute("aria-label", `ชื่อทีม ${index + 1}`);
-    input.placeholder = `ชื่อทีม ${index + 1}`;
+    input.setAttribute("aria-label", `Team ${index + 1} name`);
+    input.placeholder = `Team ${index + 1} name`;
     grid.appendChild(input);
   });
 }
@@ -823,7 +823,7 @@ document.getElementById("saveNames").addEventListener("click", () => {
   if (!isControl) return;
   const inputs = [...document.querySelectorAll("#teamEditGrid input")];
   inputs.forEach((input, index) => { teamNames[index] = input.value.trim() || `Team ${index + 1}`; });
-  // เปลี่ยนชื่อทีมแล้วเริ่มสายแข่งใหม่ เพื่อไม่ให้ผลเดิมผูกกับชื่อเก่า
+  // Restart the bracket after renaming teams so old results are not tied to the old names.
   Object.values(matches).forEach(m => {
     m.winner = null;
     m.pattern = null;
@@ -834,9 +834,9 @@ document.getElementById("saveNames").addEventListener("click", () => {
     } else m.teams = ["", ""];
   });
   render(); saveState();
-  alert("บันทึกชื่อทีมแล้ว และล้างผลการแข่งขันเดิมแล้ว");
+  alert("Team names saved. Previous match results have been cleared.");
 });
-document.getElementById("resetButton").addEventListener("click", resetTournament);
+document.getElementById("resetButton").addEventListener("click", resetDraw);
 
 loadState();
 render();
